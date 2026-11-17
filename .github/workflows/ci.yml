@@ -1,9 +1,11 @@
 name: CI
 
+# push is not limited to main. GitHub only starts pull_request workflows
+# after the workflow file exists on the default branch, and this file is
+# introduced on the feature branch. A push runs the workflow from that commit.
 on:
   pull_request:
   push:
-    branches: [main]
 
 permissions:
   contents: read
