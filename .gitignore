@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+dist
+coverage
+.env
+.env*.local
+.vercel
+playwright-report
+test-results
+blob-report
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+gitleaks
+gitleaks.tar.gz

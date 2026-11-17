@@ -1,0 +1,14 @@
+title = "Harborlane"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented demo password and local development placeholders"
+regexes = [
+  '''Harborlane123!''',
+  '''local-dev-nextauth-secret''',
+  '''local-docker-only-secret''',
+  '''ci-only-nextauth-secret''',
+  '''replace-with-openssl-rand-base64-32''',
+]

@@ -1,0 +1,35 @@
+# Local development only. The app secret below is a placeholder, not a production credential.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: harborlane
+      POSTGRES_PASSWORD: harborlane
+      POSTGRES_DB: harborlane
+    ports:
+      - "5432:5432"
+    volumes:
+      - harborlane_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harborlane -d harborlane"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://harborlane:harborlane@postgres:5432/harborlane?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: local-docker-only-secret
+      BILLING_MODE: mock
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "3000"
+
+volumes:
+  harborlane_pg:
