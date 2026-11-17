@@ -44,9 +44,12 @@ export default async function LoginPage({
       </section>
       {demo ? (
         <aside className="auth-card">
-          <p className="kicker">Seeded database</p>
+          <p className="kicker">Demo only</p>
           <h2>Sample accounts</h2>
-          <p>These people are fictional. They exist only after the database seed runs.</p>
+          <p>
+            Demo-only logins for the seeded database. The people are fictional. They are not real
+            users, and they exist only after the seed runs.
+          </p>
           <ul className="activity">
             {DEMO_ACCOUNTS.map((account) => (
               <li key={account.email}>

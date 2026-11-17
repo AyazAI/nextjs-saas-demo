@@ -1,49 +1,42 @@
 # Harborlane
 
-Portfolio demo for [Muhammad Ayaz](https://github.com/AyazAI). Harborlane is a multi-tenant workspace where a small service team keeps clients, tasks, and invoices in one organization, with roles and a Pro plan.
+[![CI](https://github.com/AyazAI/nextjs-saas-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/AyazAI/nextjs-saas-demo/actions/workflows/ci.yml)
 
-This repository is named `nextjs-saas-demo`. A clearer name is **`harborlane`**. Renaming is left to the owner. The repository stays private.
+Portfolio demo by [Muhammad Ayaz](https://github.com/AyazAI). Harborlane is a multi-tenant workspace where a small service team keeps clients, tasks, and invoices together, with roles and a Pro plan.
 
-Live demo: not deployed.
+This repository is named `nextjs-saas-demo`. A clearer name is **`harborlane`**.
+
+**Live demo: not deployed yet.**
+
+Sample Studio and the seeded people are fictional. Harborlane is not a launched product. This README does not claim revenue, users, or client engagements.
 
 ## Problem
 
-Small teams split client work across a task list, a spreadsheet, and invoices. Harborlane puts those records in one workspace:
+Small teams split client work across a task list, a spreadsheet, and a stack of invoices. Harborlane puts those records in one organization:
 
-- An organization has members, clients, tasks, and invoices.
+- Members, clients, tasks, and invoices belong to a workspace.
 - Owners manage the plan. Admins run the books. Members move tasks and cannot create invoices.
 - The Free plan has low limits. Pro raises them.
 
-Sample Studio and its people are fictional seed data. They are not customers. Harborlane is not a launched product, and this README does not claim revenue, users, or client engagements.
-
 ## Architecture
 
-The browser talks to one Next.js app. Route handlers under `/api` are the HTTP API. They call domain services, which use Prisma. Auth.js (NextAuth.js 4, the stable line) issues a JWT session. Billing either calls Stripe in test mode or updates the plan locally when Stripe is not configured.
+The browser talks to one Next.js app. Route handlers under `/api` are the HTTP API. They call domain services, which use Prisma. NextAuth.js issues a JWT session. Billing either calls Stripe in test mode or updates the plan locally when Stripe is not configured.
 
 ```mermaid
 flowchart TD
-  browser[Browser]
-  nextApp[Next.js App Router]
-  api[Route handlers under /api]
-  auth[NextAuth.js credentials and optional GitHub]
-  domain[Domain services]
-  prisma[Prisma]
-  db[(Postgres)]
-  stripe[Stripe test mode]
-  mock[Local mock billing]
-
-  browser --> nextApp
-  nextApp --> api
-  api --> auth
-  api --> domain
-  domain --> prisma
-  prisma --> db
-  api --> stripe
-  api --> mock
+  browser[Browser] --> app[Next.js App Router]
+  app --> api[Route handlers under /api]
+  api --> auth[NextAuth.js]
+  api --> domain[Domain services]
+  domain --> db[(Postgres via Prisma)]
+  api --> stripe[Stripe test mode]
+  api --> mock[Local mock billing]
   stripe -->|signed webhook| api
 ```
 
-Route handlers live in the Next.js app instead of a second Node service. One process can sit on a single free web service, shares TypeScript types with the UI, and still exposes a real HTTP API. A separate service would need another host, CORS, and its own deploy.
+![Harborlane architecture](docs/architecture.png)
+
+Route handlers live in the Next.js app so one process can sit on a single free web service, share TypeScript types with the UI, and still expose an HTTP API.
 
 ## Stack
 
@@ -59,13 +52,15 @@ Route handlers live in the Next.js app instead of a second Node service. One pro
 
 Prisma 6.19.3 is the classic `prisma-client-js` client. The npm `latest` tag for Prisma is currently an 8.0 release candidate. NextAuth.js v5 is still `5.0.0-beta` and is not the npm `latest` release, so this demo stays on the stable 4.24 line.
 
+The CI badge points at [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It shows the latest GitHub Actions result for that workflow. It is not a product metric.
+
 ## Run it locally
 
 Node.js 22 or newer, and Postgres 16.
 
 ```bash
 cp .env.example .env
-# Create the database from DATABASE_URL, then:
+# Create the database named in DATABASE_URL, then:
 npm install
 npx prisma migrate deploy
 npm run db:seed
@@ -85,9 +80,9 @@ docker compose exec app npm run db:seed
 
 The Compose app secret is a local placeholder. Postgres data lives in the `harborlane_pg` volume.
 
-### Sample accounts
+### Demo-only sample accounts
 
-These accounts exist only after seeding. They are fictional.
+These accounts exist only after seeding. They are fictional demo logins, not real users. Do not reuse the password anywhere else. Seeding a public URL publishes this password.
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -95,7 +90,29 @@ These accounts exist only after seeding. They are fictional.
 | Admin | admin@harborlane.demo | Harborlane123! |
 | Member | member@harborlane.demo | Harborlane123! |
 
-The login page lists them when the owner account is in the database.
+The login page lists them when the owner account is in the database, under a **Demo only** label.
+
+## Demo
+
+Sign in with the demo owner, add a client, create an invoice, and turn on Pro with mock billing. No card is charged.
+
+![Harborlane demo: sign in, add a client, create an invoice, activate Pro](docs/demo.gif)
+
+## Screenshots
+
+Taken with Playwright from the running app and the seeded database.
+
+![Harborlane marketing page](docs/screenshots/01-marketing.png)
+
+![Sign in, with demo-only sample accounts](docs/screenshots/02-login.png)
+
+![Sample Studio overview](docs/screenshots/03-overview.png)
+
+![Task board](docs/screenshots/04-tasks.png)
+
+![Invoice SAMPLE-1001](docs/screenshots/05-invoice.png)
+
+![Billing on the local mock](docs/screenshots/06-billing.png)
 
 ## Tests
 
@@ -175,7 +192,7 @@ Going back to Free does not delete records that are already over the cap. It blo
 
 ## Deploy a free demo
 
-Nothing in this repo has been deployed. Do not use a paid plan or live Stripe keys.
+Nothing in this repo has been deployed. Use a free tier and Stripe test mode only.
 
 A practical free path is **Vercel Hobby** for the Next.js app and **Neon** (or Supabase) for Postgres. A Render free **web service** also works: bind `0.0.0.0` and `$PORT` (the start script and Dockerfile already do), and expect the free instance to sleep after about 15 minutes. The filesystem is ephemeral, so the database has to be hosted elsewhere. Route handlers and webhooks need that web service.
 
@@ -189,7 +206,7 @@ Environment variables to set in the host, from `.env.example`:
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `DATABASE_URL` | Yes | Neon or Supabase **pooled** URL for the app. Use the direct URL for `migrate deploy` if the host requires it. |
+| `DATABASE_URL` | Yes | Neon or Supabase pooled URL for the app. Use the direct URL for `migrate deploy` if the host requires it. |
 | `NEXTAUTH_URL` | Yes | Public origin, for example `https://your-app.vercel.app` |
 | `NEXTAUTH_SECRET` | Yes | `openssl rand -base64 32`. Not the placeholder in `.env.example`. |
 | `BILLING_MODE` | Yes for a first demo | `mock` until Stripe test keys exist |
@@ -199,35 +216,18 @@ Environment variables to set in the host, from `.env.example`:
 | `AUTH_GITHUB_ID` | No | GitHub OAuth client id |
 | `AUTH_GITHUB_SECRET` | No | GitHub OAuth client secret |
 
-Ayaz needs to create those accounts and keys himself: a Vercel or Render account, a Neon or Supabase project, a generated `NEXTAUTH_SECRET`, and optionally a GitHub OAuth app and a Stripe **test** product. This project does not provision them.
+The deployer creates those accounts and keys: a Vercel or Render account, a Neon or Supabase project, a generated `NEXTAUTH_SECRET`, and optionally a GitHub OAuth app and a Stripe **test** product. This project does not provision them.
 
-After the first deploy, run `prisma migrate deploy`. Run `npm run db:seed` only if the sample login should work. Seeding a public URL publishes the demo password above. The sample workspace holds fictional data, but anyone with the password can sign in as the owner.
+After the first deploy, run `prisma migrate deploy`. Run `npm run db:seed` only if the demo-only sample login should work. Anyone with that password can sign in as the owner of the fictional workspace.
 
 Stripe webhooks need the public HTTPS URL `https://<host>/api/billing/webhook` and the test signing secret. The mock path works with no Stripe account.
 
-## Decisions still open
+## Before a live URL
 
-- Rename the repository to `harborlane`, or pick another product name. Leave it private until there is a deliberate choice to show it publicly. A private repo is not visible to a hiring manager.
-- Host the free demo on Vercel + Neon, or on Render + Neon/Supabase.
-- Seed the live demo (shared sample login) or leave it signup-only.
-- Turn on GitHub OAuth, Stripe test checkout, or keep the local mock.
-- Replace Harborlane if a different small product is a better portfolio fit.
-
-## Screenshots
-
-Taken with Playwright from the running app and the seeded database.
-
-![Harborlane marketing page](docs/screenshots/01-marketing.png)
-
-![Sign in, with fictional sample accounts](docs/screenshots/02-login.png)
-
-![Sample Studio overview](docs/screenshots/03-overview.png)
-
-![Task board](docs/screenshots/04-tasks.png)
-
-![Invoice SAMPLE-1001](docs/screenshots/05-invoice.png)
-
-![Billing on the local mock](docs/screenshots/06-billing.png)
+- Rename the repository to `harborlane`, or keep `nextjs-saas-demo`.
+- Host on Vercel plus Neon, or on Render plus Neon or Supabase.
+- Seed the live demo (shared demo-only login) or leave it signup-only.
+- Turn on GitHub OAuth and Stripe test checkout, or keep the local mock.
 
 ## License
 

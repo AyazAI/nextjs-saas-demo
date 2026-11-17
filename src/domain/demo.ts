@@ -1,3 +1,4 @@
+// Demo-only seed logins. The people and the .demo addresses are fictional.
 export const DEMO_PASSWORD = "Harborlane123!";
 
 export const SAMPLE_ORG_SLUG = "sample-studio";

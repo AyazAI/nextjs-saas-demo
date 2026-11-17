@@ -8,6 +8,7 @@ coverage
 .vercel
 playwright-report
 test-results
+tmp
 blob-report
 *.tsbuildinfo
 npm-debug.log*
