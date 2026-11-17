@@ -1,0 +1,10 @@
+%%{init: {"theme": "neutral", "flowchart": {"curve": "basis", "nodeSpacing": 40, "rankSpacing": 50}} }%%
+flowchart TD
+  browser[Browser] --> app[Next.js App Router]
+  app --> api[Route handlers under /api]
+  api --> auth[NextAuth.js]
+  api --> domain[Domain services]
+  domain --> db[(Postgres via Prisma)]
+  api --> stripe[Stripe test mode]
+  api --> mock[Local mock billing]
+  stripe -->|signed webhook| api
